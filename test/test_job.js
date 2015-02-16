@@ -64,6 +64,32 @@ describe('Job', function(){
             expect(storedJob).to.be(null);
           });
       })
+
+      it('emits removed event', function (cb) {
+        queue.once('removed', function (job) {
+          expect(job.data.foo).to.be.equal('bar');
+          cb();
+        });
+        Job.create(queue, 1, {foo: 'bar'}).then(function(job){
+          job.remove();
+        });
+      });
+  });
+
+  describe('.retry', function () {
+    it('emits waiting event', function (cb) {
+      queue.add({foo: 'bar'});
+      queue.process(function (job, done) {
+        done(new Error('the job failed'));
+      });
+      queue.once('failed', function (job) {
+        queue.once('waiting', function (job) {
+          expect(job.data.foo).to.be.equal('bar');
+          cb();
+        });
+        job.retry();
+      });
+    });
   });
 
   describe('Locking', function(){
