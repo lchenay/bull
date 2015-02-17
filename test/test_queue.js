@@ -713,9 +713,8 @@ describe('Queue', function(){
 
     })
 
-    it.only("should process delayed jobs in correct order even in case of restart", function(done){
+    it("should process delayed jobs in correct order even in case of restart", function(done){
       var order = 1;
-      this.timeout(10000);
       queue = Queue("delayed queue multiple");
 
       var fn = function(job, jobDone){
