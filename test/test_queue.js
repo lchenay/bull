@@ -727,10 +727,8 @@ describe('Queue', function(){
         order++;
         //We simulate a restart
         return queue.close().then(function() {
-            return Promise.delay(100).then(function() {
-              queue = Queue("delayed queue multiple");
-              queue.process(fn);
-            })
+            queue = Queue("delayed queue multiple");
+            queue.process(fn);
         });
 
       };
