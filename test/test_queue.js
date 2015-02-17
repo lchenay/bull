@@ -712,6 +712,37 @@ describe('Queue', function(){
       queue.add({order: 8}, {delay: 800});
 
     })
+
+    it.only("should process delayed jobs in correct order even in case of restart", function(done){
+      var order = 1;
+      this.timeout(10000);
+      queue = Queue("delayed queue multiple");
+
+      var fn = function(job, jobDone){
+        expect(order).to.be.equal(job.data.order);
+        jobDone();
+        if (order === 4) {
+          done();
+        }
+
+        order++;
+        //We simulate a restart
+        return queue.close().then(function() {
+            return Promise.delay(100).then(function() {
+              queue = Queue("delayed queue multiple");
+              queue.process(fn);
+            })
+        });
+
+      };
+
+      queue.process(fn);
+
+      queue.add({order: 2}, {delay: 200});
+      queue.add({order: 4}, {delay: 400});
+      queue.add({order: 1}, {delay: 100});
+      queue.add({order: 3}, {delay: 300});
+    })
   });
 
   describe("Concurrency process", function() {
